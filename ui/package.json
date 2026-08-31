@@ -1,0 +1,28 @@
+{
+  "name": "multiprint-frontend-vue-js",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 5174",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4174"
+  },
+  "dependencies": {
+    "@tanstack/vue-query": "^5.85.5",
+    "@tanstack/vue-table": "^8.21.3",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "chart.js": "^4.5.1",
+    "jspdf": "^3.0.1",
+    "lucide-vue-next": "^0.468.0",
+    "vue": "^3.5.13",
+    "vue-chartjs": "^5.3.3",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "vite": "^6.0.5"
+  }
+}

@@ -1,0 +1,76 @@
+services:
+  db:
+    image: postgres:16
+    container_name: multiprint-express-postgres
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-assetmanagement_db}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Admin12345}
+    volumes:
+      - express-postgres-data:/var/lib/postgresql/data
+      - ./BackendExpress/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-assetmanagement_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  backend-express:
+    container_name: multiprint-backend-express
+    build:
+      context: ./BackendExpress
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${EXPRESS_PORT:-5002}:5002"
+    environment:
+      PORT: 5002
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5174}
+      DATABASE_URL: postgres://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-Admin12345}@db:5432/${POSTGRES_DB:-assetmanagement_db}
+      JWT_SECRET: ${JWT_SECRET:-multiprint-express-local-jwt-key-change-before-production}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      ADMIN_USER_ID: ${ADMIN_USER_ID:-ADM001}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@multiprint.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin12345!}
+      ADMIN_NAME: ${ADMIN_NAME:-Administrator}
+    restart: unless-stopped
+
+  frontend-vue:
+    container_name: multiprint-frontend-vue
+    build:
+      context: ./FrontendVue
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:5002/api}
+    depends_on:
+      - backend-express
+    ports:
+      - "${FRONTEND_PORT:-5174}:80"
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: multiprint-pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${PGADMIN_PORT:-5051}:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@multiprint.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-Admin12345!}
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - ./BackendExpress/pgadmin/servers.json:/pgadmin4/servers.json:ro
+    restart: unless-stopped
+
+volumes:
+  express-postgres-data:
+  pgadmin-data:

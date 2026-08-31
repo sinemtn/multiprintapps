@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Multiprint PostgreSQL",
+      "Group": "Servers",
+      "Host": "db",
+      "Port": 5432,
+      "MaintenanceDB": "assetmanagement_db",
+      "Username": "admin",
+      "SSLMode": "prefer"
+    }
+  }
+}
