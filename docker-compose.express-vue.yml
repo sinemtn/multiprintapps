@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Admin12345}
     volumes:
       - express-postgres-data:/var/lib/postgresql/data
-      - ./BackendExpress/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./service/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-assetmanagement_db}"]
       interval: 10s
@@ -22,7 +22,7 @@ services:
   backend-express:
     container_name: multiprint-backend-express
     build:
-      context: ./BackendExpress
+      context: ./service
       dockerfile: Dockerfile
     depends_on:
       db:
@@ -44,7 +44,7 @@ services:
   frontend-vue:
     container_name: multiprint-frontend-vue
     build:
-      context: ./FrontendVue
+      context: ./ui
       dockerfile: Dockerfile
       args:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:5002/api}
@@ -68,7 +68,7 @@ services:
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
     volumes:
       - pgadmin-data:/var/lib/pgadmin
-      - ./BackendExpress/pgadmin/servers.json:/pgadmin4/servers.json:ro
+      - ./service/pgadmin/servers.json:/pgadmin4/servers.json:ro
     restart: unless-stopped
 
 volumes:
